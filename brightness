@@ -22,9 +22,12 @@ def main():
     Read the brightness file and perform the operation on it
     then write the new brightness to the file
     """
-    if len(sys.argv) != 4:  # check number of args, print usage statement if incorrect
-        print('usage: ' + sys.argv[0] + '  brightness_path operation brightness')
-        print('possible operations: set, inc, or dec')
+
+    # check number of args, print usage statement if incorrect
+    if len(sys.argv) != 4 and len(sys.argv) != 3:
+        print('usage: ' + sys.argv[0] + '  brightness_path ' \
+                'operation [brightness]')
+        print('possible operations: set, inc, dec, get')
         print('possible brightness: 0 - 100')
         sys.exit()
 
@@ -34,16 +37,18 @@ def main():
     # check if / in path
     if PATH.strip()[-1] != "/":
         PATH += "/"
+
+    # get system specific brightness values
     BFILE = PATH + "brightness"
     MBFILE = PATH + "max_brightness"
     with open(MBFILE, 'r') as f:
         MAX_BRIGHTNESS = int(f.readline())
     OP = sys.argv[2]
-    BRIGHTNESS = int(sys.argv[3]) # get brightness percentage
-    BRIGHTNESS = MAX_BRIGHTNESS * (BRIGHTNESS / 100) # divide it by 100
+    if len(sys.argv) > 3:
+        BRIGHTNESS = int(sys.argv[3]) # get brightness percentage
+        BRIGHTNESS = MAX_BRIGHTNESS * (BRIGHTNESS / 100) # divide it by 100
 
     with open(BFILE, 'w+') as f:
-
         current_brightness = get_brightness(BFILE)  # read current brightness
 
         # set the brightness
@@ -65,6 +70,11 @@ def main():
             current_brightness -= BRIGHTNESS
             if current_brightness < 0:
                 current_brightness = 0
+
+        # get the brightness
+        elif OP == 'get':
+            print(int((current_brightness / MAX_BRIGHTNESS) * 100))
+            sys.exit()
 
         # write to file
         set_brightness(BFILE, current_brightness)
