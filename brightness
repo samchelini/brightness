@@ -2,39 +2,63 @@
 
 import sys
 
+def get_brightness(bfile):
+    """
+    get the current brightness from bfile
+    """
+    with open(bfile, 'r') as f:
+        br = int(f.readline())
+    return br
+
+def set_brightness(bfile, br):
+    """
+    set the brightness to br
+    """
+    with open(bfile, 'w') as f:
+        f.write(str(int(br)))
+
 def main():
     """
     Read the brightness file and perform the operation on it
     then write the new brightness to the file
     """
     if len(sys.argv) != 4:  # check number of args, print usage statement if incorrect
-        print('usage: ' + sys.argv[0] + '  path_to_brightness_file operation brightness')
+        print('usage: ' + sys.argv[0] + '  brightness_path operation brightness')
         print('possible operations: set, inc, or dec')
         print('possible brightness: 0 - 100')
         sys.exit()
 
-    # get the args
-    FILE = sys.argv[1]
+    # read arguments
+    PATH = sys.argv[1]
+
+    # check if / in path
+    if PATH.strip()[-1] != "/":
+        PATH += "/"
+    BFILE = PATH + "brightness"
+    MBFILE = PATH + "max_brightness"
+    with open(MBFILE, 'r') as f:
+        MAX_BRIGHTNESS = int(f.readline())
     OP = sys.argv[2]
-    BRIGHTNESS = int(sys.argv[3]) * 10  # get brightness and convert
+    BRIGHTNESS = int(sys.argv[3]) # get brightness percentage
+    BRIGHTNESS = MAX_BRIGHTNESS * (BRIGHTNESS / 100) # divide it by 100
 
-    with open(FILE, 'w+') as f:
+    with open(BFILE, 'w+') as f:
 
-        current_brightness = int(f.readline())  # read current brightness
+        current_brightness = get_brightness(BFILE)  # read current brightness
 
         # set the brightness
         if OP == 'set':
             current_brightness = BRIGHTNESS
             if current_brightness < 0:
                 current_brightness = 0
-            elif current_brightness > 937:
-                current_brightness = 937
+            elif current_brightness > MAX_BRIGHTNESS:
+                current_brightness = MAX_BRIGHTNESS
 
         # increment the brightness
         elif OP == 'inc':
             current_brightness += BRIGHTNESS
-            if current_brightness > 937:
-                current_brightness = 937
+            if current_brightness > MAX_BRIGHTNESS:
+                current_brightness = MAX_BRIGHTNESS
     
         # decrement the brightness
         elif OP == 'dec':
@@ -43,7 +67,7 @@ def main():
                 current_brightness = 0
 
         # write to file
-        f.write(str(current_brightness))
+        set_brightness(BFILE, current_brightness)
 
     return
 
